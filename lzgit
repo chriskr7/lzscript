@@ -1,0 +1,84 @@
+#!/usr/bin/python
+
+
+import os
+import sys
+import getopt
+
+__author__ = 'LaZyDev (chriskr7@gmail.com)'
+
+
+# print usage
+def print_usage():
+    print("lzgit is a tool for managing remote github repository\n")
+    print("Usage:\n")
+    print("\tlzgit command [opt]\n")
+    print("The command are:\n")
+    print("\tcreate\tcreate github remote repository\n\n")
+    print("Use \"lzgit help [topic]\" for more information about that topic.")
+    sys.exit()
+
+
+# help
+def print_help(topic):
+    if topic == "create":
+        print("Usage: lzgit create -u $(user_name) -r $(repo_name)\n")
+        print("The $(user_name) represent your github user name.")
+        print("The $(repo_name) is the repository name you want to create.")
+    sys.exit()
+
+
+def create_repo(argv):
+
+    if(len(argv) < 2):
+        print_usage(argv[0])
+        sys.exit()
+
+    try:
+        cmd_opts, cmd_arg = getopt.getopt(argv[2:], "hu:r:", "help")
+        print(len(cmd_opts))
+
+        if len(cmd_opts) != 2 or \
+                (len(cmd_opts) == 1 and cmd_opts[0][0] != "-h" and cmd_opts[0][0] != "--help"):
+            print_usage()
+            sys.exit()
+    except getopt.GetoptError as err:
+        print str(err)
+        print_usage()
+        sys.exit()
+
+    for opt, arg in cmd_opts:
+        if opt == "-u":
+            username = arg
+            print(username)
+        elif opt == "-r":
+            repo = arg
+            print(repo)
+        elif opt in ("-h", "--help"):
+            print_usage(argv[0])
+            sys.exit()
+        else:
+            print_usage(argv[0])
+            sys.exit()
+
+    create_cmd = "curl -u '" + username + "' https://api.github.com/user/repos " \
+        + "-d '{\"name\":\"" + repo + "\"}'"
+    os.system(create_cmd)
+    return username, repo
+
+
+# main
+def main(argv):
+    cmd_list = ["help", "create"]
+    if len(argv) < 2 or argv[1] not in cmd_list:
+        print_usage()
+
+    if argv[1] == "help":
+        print_help(argv[2])
+
+    if argv[1] == "create":
+        create_repo(argv)
+
+
+if __name__ == "__main__":
+    main(sys.argv)
